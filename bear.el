@@ -32,9 +32,61 @@
   :group 'convenience)
 
 (defcustom bear:notes-dir "~/"
-  "Where to put newl created notes."
+  "Where to put newly created notes."
   :group 'bear
   :type 'string)
+
+
+(defun bear:get-string-from-file (filePath)
+  "Return filePath's file content. http://ergoemacs.org/emacs/elisp_read_file_content.html"
+  (interactive)
+  (with-temp-buffer
+    (insert-file-contents filePath)
+    (buffer-string)))
+
+(defun bear:create-note (title tags)
+  "Start a new markdown note with TITLE."
+  (interactive "stitle:\n stags: ")
+  (find-file (concat bear:notes-dir title ".md")))
+
+(defun bear:encode-note (file)
+  "Encode the note of name FILE."
+  (let ((note (base64-encode-string (bear:get-string-from-file
+                                     (concat bear:notes-dir file)))))))
+
+(defun bear:push-note (title tags)
+  (interactive "stitle: \nstags-string: ")
+  (find-file (concat bear:notes-dir title ".md"))
+  (let ((completed-yet (read-string "completed? "))) ;; so this kind of works, but what we really need is a minor mode for bear, and then for the on save hook, get the tags and title somehow??
+    (let* ((file-name (completing-read "note: " (s-split "\n" (s-chomp (shell-command-to-string (concat "find"
+                                                                                                        " "
+                                                                                                        bear:notes-dir
+                                                                                                        " "
+                                                                                                        "-maxdepth 1"
+                                                                                                        " "
+                                                                                                        "-name '*.md'"
+                                                                                                        " "
+                                                                                                        "-type f"
+                                                                                                        " "
+                                                                                                        "-exec basename {} \\;"))))))
+           (encoded-file (bear:encode-note file-name)))
+      (with-temp-buffer
+        (cd bear:notes-dir)
+        (async-shell-command (concat "open"
+                                     " "
+                                     "'"
+                                     "bear://x-callback-url/create?title="
+                                     (url-encode-url title)
+                                     "&"
+                                     "tags="
+                                     (if (not (string= "" tags))
+                                         (url-encode-url tags)
+                                       "emacs")
+                                     "&file="
+                                     encoded-file
+                                     "&filename="
+                                     file-name
+                                     "'"))))))
 
 
 (defun bear:new-note (title tags)
