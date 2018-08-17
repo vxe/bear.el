@@ -27,6 +27,21 @@
 ;;; Code:
 
 
+(defun bear:new-note (title tags)
+  "Create a new note with a TITLE and TAGS string only."
+  (interactive "stitle: \nstags-string: ")
+  (async-shell-command (concat "open "
+                               "'"
+                               "bear://x-callback-url/create?title="
+                               (url-encode-url title)
+                               "&"
+                               "tags="
+                               (if (not (string= "" tags))
+                                   (url-encode-url tags)
+                                 "emacs")
+                               "'")))
+
+
 
 (provide 'bear)
 

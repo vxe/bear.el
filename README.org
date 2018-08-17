@@ -1,0 +1,26 @@
+# -*- mode:org -*-
+#+TITLE: bear
+#+STARTUP: indent
+#+OPTIONS: toc:nil
+x-callback-url wrapper for bear on OSX
+** Overview :TOC:
+- [[#installation][Installation]]
+- [[#usage][Usage]]
+- [[#extending][Extending]]
+- [[#implementation][Implementation]]
+
+* Installation
+There is one function ~bear:new-note~ which will prompt for a note title and tags
+It will eventually pop into a markdown editor and allow to add a body, but not yet
+* Usage
+You will need Emacs 24+, `make` and [Cask](https://github.com/cask/cask) to
+build the project.
+
+#+BEGIN_SRC shell
+    cd bear
+    make && make install
+
+#+END_SRC
+* Extending
+* Implementation 
+
