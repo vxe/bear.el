@@ -26,6 +26,16 @@
 
 ;;; Code:
 
+(defgroup bear nil
+  "Interact with bear through emacs."
+  :group 'tools
+  :group 'convenience)
+
+(defcustom bear:notes-dir "~/"
+  "Where to put newl created notes."
+  :group 'bear
+  :type 'string)
+
 
 (defun bear:new-note (title tags)
   "Create a new note with a TITLE and TAGS string only."
@@ -40,8 +50,6 @@
                                    (url-encode-url tags)
                                  "emacs")
                                "'")))
-
-
 
 (provide 'bear)
 
