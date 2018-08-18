@@ -6,21 +6,39 @@ x-callback-url wrapper for bear on OSX
 ** Overview :TOC:
 - [[#installation][Installation]]
 - [[#usage][Usage]]
+- [[#limitations][Limitations]]
 - [[#extending][Extending]]
 - [[#implementation][Implementation]]
 
 * Installation
-There is one function ~bear:new-note~ which will prompt for a note title and tags
-It will eventually pop into a markdown editor and allow to add a body, but not yet
-* Usage
 You will need Emacs 24+, `make` and [Cask](https://github.com/cask/cask) to
 build the project.
 
 #+BEGIN_SRC shell
     cd bear
     make && make install
-
 #+END_SRC
-* Extending
-* Implementation 
+* Usage
+To create a note
+#+BEGIN_SRC elisp
+M-x bear:create-note
+#+END_SRC
 
+Which will prompt you for a
+- note title
+- tag string (eg. top-level/sub-heading1-sub-heading2)
+
+Now you're in a markdown buffer, once done editing:
+
+#+BEGIN_SRC elisp
+C-c C-c
+#+END_SRC
+
+This /should/ pop open Bear.app with the note you have just created there
+* Limitations
+I indiscriminately convert all single quotes to double quotes to make
+this work.  I imagine there are quoting bugs galore but so far haven't
+run in into anything as my notes have simple title and content by and large.
+* Extending
+Add more function and add them to the minor mode keybinding
+* [[file:bear.el][Implementation]]
