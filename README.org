@@ -19,7 +19,12 @@ build the project.
     make && make install
 #+END_SRC
 * Usage
-To create a note
+Set your notes directory
+#+BEGIN_SRC elisp
+M-x customize-group bear
+#+END_SRC
+
+To create a note:
 #+BEGIN_SRC elisp
 M-x bear:create-note
 #+END_SRC
