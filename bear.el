@@ -38,26 +38,74 @@
 
 
 (defun bear:get-string-from-file (filePath)
-  "Return filePath's file content. http://ergoemacs.org/emacs/elisp_read_file_content.html"
+  "Return FILEPATH's file content."
   (interactive)
   (with-temp-buffer
     (insert-file-contents filePath)
     (buffer-string)))
 
-(defun bear:create-note (title tags)
-  "Start a new markdown note with TITLE."
-  (interactive "stitle:\n stags: ")
-  (find-file (concat bear:notes-dir title ".md")))
+(defun bear:create-note (title tag-string)
+  "Create a note with TITLE and TAG-STRING in bear:notes-dir."
+  (interactive "stitle: \nstags: ")
+  (with-temp-buffer
+    (cd bear:notes-dir)
+    (find-file (s-replace-regexp " " "-" (concat bear:notes-dir title ".md")))
+    (insert (concat title))
+    (insert "\n")
+    (insert tag-string)
+    (bear-mode)))
 
 (defun bear:encode-note (file)
   "Encode the note of name FILE."
   (let ((note (base64-encode-string (bear:get-string-from-file
                                      (concat bear:notes-dir file)))))))
 
-(defun bear:push-note (title tags)
-  (interactive "stitle: \nstags-string: ")
-  (find-file (concat bear:notes-dir title ".md"))
-  (let ((completed-yet (read-string "completed? "))) ;; so this kind of works, but what we really need is a minor mode for bear, and then for the on save hook, get the tags and title somehow??
+(defun bear:push ()
+  "Upload the curent buffer to Bear."
+  (interactive)
+  (save-buffer)
+  (let* ((file-name (buffer-name))
+         (note-title (s-chomp (shell-command-to-string (concat "cat"
+                                                               " "
+                                                               bear:notes-dir
+                                                               file-name
+                                                               "|"
+                                                               "head -1"
+                                                               ))))
+         (tag-string (s-chomp (shell-command-to-string (concat "cat"
+                                                               " "
+                                                               bear:notes-dir
+                                                               file-name
+                                                               "|"
+                                                               "head -2"
+                                                               "| "
+                                                               "tail -1"
+                                                               ))))
+         (contents (s-chomp (shell-command-to-string (concat "cat"
+                                                             " "
+                                                             bear:notes-dir
+                                                             file-name
+                                                             "|"
+                                                             "tail -n +3")))))
+    (async-shell-command (concat "open"
+                                 " "
+                                 "'"
+                                 "bear://x-callback-url/create?title="
+                                 note-title
+                                 "&"
+                                 "tags="
+                                 (if (not (string= "" tag-string))
+                                     (url-encode-url tag-string)
+                                   "emacs")
+                                 "&text="
+                                 (s-replace-regexp "[']" "\"" contents)
+                                 "'"))))
+
+(defun bear:push-note ()
+  "Select a note from bear notes directory."
+  (interactive)
+  (with-temp-buffer
+    (cd bear:notes-dir)
     (let* ((file-name (completing-read "note: " (s-split "\n" (s-chomp (shell-command-to-string (concat "find"
                                                                                                         " "
                                                                                                         bear:notes-dir
@@ -69,27 +117,41 @@
                                                                                                         "-type f"
                                                                                                         " "
                                                                                                         "-exec basename {} \\;"))))))
-           (encoded-file (bear:encode-note file-name)))
-      (with-temp-buffer
-        (cd bear:notes-dir)
-        (async-shell-command (concat "open"
-                                     " "
-                                     "'"
-                                     "bear://x-callback-url/create?title="
-                                     (url-encode-url title)
-                                     "&"
-                                     "tags="
-                                     (if (not (string= "" tags))
-                                         (url-encode-url tags)
-                                       "emacs")
-                                     "&file="
-                                     encoded-file
-                                     "&filename="
-                                     file-name
-                                     "'"))))))
+           (note-title (s-chomp (shell-command-to-string (concat "cat"
+                                                                 " "
+                                                                 file-name
+                                                                 "|"
+                                                                 "head -1"
+                                                                 ))))
+           (tag-string (s-chomp (shell-command-to-string (concat "cat"
+                                                                 " "
+                                                                 file-name
+                                                                 "|"
+                                                                 "head -2"
+                                                                 "| "
+                                                                 "tail -1"
+                                                                 ))))
+           (contents (s-chomp (shell-command-to-string (concat "cat"
+                                                               " "
+                                                               file-name
+                                                               "|"
+                                                               "tail -n +3")))))
+      (async-shell-command (concat "open"
+                                   " "
+                                   "'"
+                                   "bear://x-callback-url/create?title="
+                                   note-title
+                                   "&"
+                                   "tags="
+                                   (if (not (string= "" tag-string))
+                                       (url-encode-url tag-string)
+                                     "emacs")
+                                   "&text="
+                                   (s-replace-regexp "[']" "\"" contents)
+                                   "'")))))
 
 
-(defun bear:new-note (title tags)
+(defun bear:quick-note (title tags)
   "Create a new note with a TITLE and TAGS string only."
   (interactive "stitle: \nstags-string: ")
   (async-shell-command (concat "open "
@@ -102,6 +164,14 @@
                                    (url-encode-url tags)
                                  "emacs")
                                "'")))
+
+(define-minor-mode bear-mode
+  "Make editing bear notes smoother."
+  :lighter " bear"
+  :keymap (let ((map (make-sparse-keymap)))
+            (define-key map (kbd "C-c C-c") 'bear:push)
+            map)
+  (make-local-variable 'foo-count))
 
 (provide 'bear)
 
