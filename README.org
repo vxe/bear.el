@@ -40,5 +40,5 @@ I indiscriminately convert all single quotes to double quotes to make
 this work.  I imagine there are quoting bugs galore but so far haven't
 run in into anything as my notes have simple title and content by and large.
 * Extending
-Add more function and add them to the minor mode keybinding
+Add more functions and add them to the minor mode keybinding
 * [[file:bear.el][Implementation]]
