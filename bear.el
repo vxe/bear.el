@@ -70,7 +70,7 @@
 
 (defun bear:create-note (title tag-string)
   "Create a note with TITLE and TAG-STRING in bear:notes-dir."
-  (interactive "stitle: \nstags: ")
+  (interactive "stitle: \nstag(s): ")
   (with-temp-buffer
     (cd bear:notes-dir)
     (find-file (s-replace-regexp " " "-" (concat bear:notes-dir title ".md")))
@@ -81,7 +81,7 @@
 
 (defun bear:create-note-org (title tag-string)
   "Create a note with TITLE and TAG-STRING in bear:notes-dir."
-  (interactive "stitle: \nstags: ")
+  (interactive "stitle: \nstag(s): ")
   (with-temp-buffer
     (cd bear:notes-dir)
     (find-file (s-replace-regexp " " "-" (concat bear:notes-dir title ".org")))

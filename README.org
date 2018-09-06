@@ -33,7 +33,7 @@ M-x bear:create-note
 
 Which will prompt you for a
 - note title
-- tag string (eg. top-level/sub-heading1-sub-heading2)
+- comma separated list of tag strings (eg. tag_a/sub-heading1/sub-heading2, tag_b/sub-heading1/sub-heading2)
 
 Now you're in a markdown buffer, once done editing:
 
@@ -49,7 +49,7 @@ M-x bear:create-note-org
 
 Which will prompt you for a
 - note title
-- tag string (eg. top-level/sub-heading1-sub-heading2)
+- comma separated list of tag strings (eg. tag_a/sub-heading1/sub-heading2, tag_b/sub-heading1/sub-heading2)
 
 Now you're in a org buffer, once done editing:
 #+BEGIN_SRC elisp
