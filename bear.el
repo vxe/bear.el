@@ -36,6 +36,27 @@
   :group 'bear
   :type 'string)
 
+(defun bear:convert-to-markdown ()
+  "Convert the current buffer's content from orgmode to markdown format and save it with the current buffer's file name but with .md extension."
+    (interactive)
+    (progn (shell-command-on-region (point-min) (point-max)
+                                    (format "pandoc -f org -t markdown -o %s"
+                                            (concat (file-name-sans-extension (buffer-file-name)) ".md")))
+           (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
+           (goto-char (point-min))
+           (end-of-line)
+           (delete-backward-char 1)
+           (goto-char (point-max))
+           (bear-mode)))
+
+(defun bear:convert-to-markdown-and-push ()
+  "Convert the current buffer's content from orgmode to markdown format and save it with the current buffer's file name but with .md extension."
+  (interactive)
+  (progn (shell-command-on-region (point-min) (point-max)
+                                  (format "pandoc -f org -t markdown -o %s"
+                                          (concat (file-name-sans-extension (buffer-file-name)) ".md")))
+         (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
+         (bear:push)))
 
 (defun bear:get-string-from-file (filePath)
   "Return FILEPATH's file content."
@@ -53,6 +74,18 @@
     (insert (concat title))
     (insert "\n")
     (insert tag-string)
+    (bear-mode)))
+
+(defun bear:create-note-org (title tag-string)
+  "Create a note with TITLE and TAG-STRING in bear:notes-dir."
+  (interactive "stitle: \nstags: ")
+  (with-temp-buffer
+    (cd bear:notes-dir)
+    (find-file (s-replace-regexp " " "-" (concat bear:notes-dir title ".org")))
+    (insert (concat title "\\\\"))
+    (insert "\n")
+    (insert tag-string)
+    (insert "\n")
     (bear-mode)))
 
 (defun bear:encode-note (file)
@@ -170,6 +203,7 @@
   :lighter " bear"
   :keymap (let ((map (make-sparse-keymap)))
             (define-key map (kbd "C-c C-c") 'bear:push)
+            (define-key map (kbd "C-c C") 'bear:convert-to-markdown-and-push)
             map)
   (make-local-variable 'foo-count))
 

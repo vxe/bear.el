@@ -6,6 +6,7 @@ x-callback-url wrapper for bear on OSX
 ** Overview :TOC:
 - [[#installation][Installation]]
 - [[#usage][Usage]]
+  - [[#org-mode][org-mode]]
 - [[#limitations][Limitations]]
 - [[#extending][Extending]]
 - [[#implementation][Implementation]]
@@ -19,6 +20,7 @@ build the project.
     make && make install
 #+END_SRC
 * Usage
+
 Set your notes directory
 #+BEGIN_SRC elisp
 M-x customize-group bear
@@ -40,6 +42,25 @@ C-c C-c
 #+END_SRC
 
 This /should/ pop open Bear.app with the note you have just created there
+** org-mode
+#+BEGIN_SRC elisp
+M-x bear:create-note-org
+#+END_SRC
+
+Which will prompt you for a
+- note title
+- tag string (eg. top-level/sub-heading1-sub-heading2)
+
+Now you're in a org buffer, once done editing:
+#+BEGIN_SRC elisp
+C-c C
+#+END_SRC
+
+review markdown formatting and push to bear as before with
+#+BEGIN_SRC elisp
+C-c C-c
+#+END_SRC
+
 * Limitations
 I indiscriminately convert all single quotes to double quotes to make
 this work.  I imagine there are quoting bugs galore but so far haven't
