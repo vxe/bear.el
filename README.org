@@ -6,7 +6,10 @@ x-callback-url wrapper for bear on OSX
 ** Overview :TOC:
 - [[#installation][Installation]]
 - [[#usage][Usage]]
+  - [[#markdown][markdown]]
   - [[#org-mode][org-mode]]
+    - [[#new-document][new document]]
+    - [[#existing-document][existing document]]
 - [[#limitations][Limitations]]
 - [[#extending][Extending]]
 - [[#implementation][Implementation]]
@@ -19,13 +22,15 @@ build the project.
     cd bear
     make && make install
 #+END_SRC
-* Usage
 
 Set your notes directory
 #+BEGIN_SRC elisp
 M-x customize-group bear
 #+END_SRC
 
+* Usage
+
+** markdown
 To create a note:
 #+BEGIN_SRC elisp
 M-x bear:create-note
@@ -43,6 +48,7 @@ C-c C-c
 
 This /should/ pop open Bear.app with the note you have just created there
 ** org-mode
+*** new document
 #+BEGIN_SRC elisp
 M-x bear:create-note-org
 #+END_SRC
@@ -60,6 +66,7 @@ review markdown formatting and push to bear as before with
 #+BEGIN_SRC elisp
 C-c C-c
 #+END_SRC
+*** existing document
 
 * Limitations
 I indiscriminately convert all single quotes to double quotes to make
@@ -68,3 +75,7 @@ run in into anything as my notes have simple title and content by and large.
 * Extending
 Add more functions and add them to the minor mode keybinding
 * [[file:bear.el][Implementation]]
+
+
+
+

@@ -36,30 +36,64 @@
   :group 'bear
   :type 'string)
 
+(defun bear:search (query)
+  "Perform string search of QUERY on all bear notes."
+  (interactive "sQuery:")
+  (async-shell-command (concat "open"
+                               " "
+                               "'"
+                               "bear://x-callback-url/search?term="
+                               "'"
+                               query)))
+
 (defun bear:convert-to-markdown ()
   "Convert the current buffer's content from orgmode to markdown format and save it with the current buffer's file name but with .md extension."
-    (interactive)
+  (interactive)
+  (progn (shell-command-on-region (point-min) (point-max)
+                                  (format "pandoc -f org -t markdown -o %s"
+                                          (concat (file-name-sans-extension (buffer-file-name)) ".md")))
+         (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
+         (goto-char (point-min))
+         (end-of-line)
+         (delete-backward-char 1)
+         (goto-char (point-max))
+         (bear-mode)))
+
+(defun bear:convert-existing-to-markdown (title tag-string)
+  "Convert the current buffer's content from orgmode to markdown format and save it with the current buffer's file name but with .md extension."
+  (interactive "stitle: \nstag(s): ")
+  (let ((file-name (s-replace-regexp "[.]org"
+                              ""
+                              (buffer-name))))
     (progn (shell-command-on-region (point-min) (point-max)
                                     (format "pandoc -f org -t markdown -o %s"
-                                            (concat (file-name-sans-extension (buffer-file-name)) ".md")))
-           (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
+                                            (concat bear:notes-dir
+                                                    file-name
+                                                    ".md")))
+           (find-file (concat bear:notes-dir file-name ".md"))
            (goto-char (point-min))
+           (newline)
+           (goto-char (point-min))
+           (insert (concat title))
            (end-of-line)
-           (delete-backward-char 1)
+           (newline)
+           (insert tag-string)
+           (end-of-line)
+           (newline)
            (goto-char (point-max))
-           (bear-mode)))
+           (bear-mode))))
 
 (defun bear:convert-to-markdown-and-push ()
   "Convert the current buffer's content from orgmode to markdown format and save it with the current buffer's file name but with .md extension."
-    (interactive)
-    (progn (shell-command-on-region (point-min) (point-max)
-                                    (format "pandoc -f org -t markdown -o %s"
-                                            (concat (file-name-sans-extension (buffer-file-name)) ".md")))
-           (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
-           (goto-char (point-min))
-           (end-of-line)
-           (delete-backward-char 1)
-           (bear:push)))
+  (interactive)
+  (progn (shell-command-on-region (point-min) (point-max)
+                                  (format "pandoc -f org -t markdown -o %s"
+                                          (concat (file-name-sans-extension (buffer-file-name)) ".md")))
+         (find-file (concat (file-name-sans-extension (buffer-file-name)) ".md"))
+         (goto-char (point-min))
+         (end-of-line)
+         (delete-backward-char 1)
+         (bear:push)))
 
 (defun bear:get-string-from-file (filePath)
   "Return FILEPATH's file content."
@@ -100,17 +134,15 @@
   "Upload the curent buffer to Bear."
   (interactive)
   (save-buffer)
-  (let* ((file-name (buffer-name))
+  (let* ((file-name (buffer-file-name))
          (note-title (s-chomp (shell-command-to-string (concat "cat"
                                                                " "
-                                                               bear:notes-dir
                                                                file-name
                                                                "|"
                                                                "head -1"
                                                                ))))
          (tag-string (s-chomp (shell-command-to-string (concat "cat"
                                                                " "
-                                                               bear:notes-dir
                                                                file-name
                                                                "|"
                                                                "head -2"
@@ -119,23 +151,22 @@
                                                                ))))
          (contents (s-chomp (shell-command-to-string (concat "cat"
                                                              " "
-                                                             bear:notes-dir
                                                              file-name
                                                              "|"
                                                              "tail -n +3")))))
-    (async-shell-command (concat "open"
-                                 " "
-                                 "'"
-                                 "bear://x-callback-url/create?title="
-                                 note-title
-                                 "&"
-                                 "tags="
-                                 (if (not (string= "" tag-string))
-                                     (url-encode-url tag-string)
-                                   "emacs")
-                                 "&text="
-                                 (s-replace-regexp "[']" "\"" contents)
-                                 "'"))))
+     (async-shell-command (concat "open"
+                                   " "
+                                   "'"
+                                   "bear://x-callback-url/create?title="
+                                   note-title
+                                   "&"
+                                   "tags="
+                                   (if (not (string= "" tag-string))
+                                       (url-encode-url tag-string)
+                                     "emacs")
+                                   "&text="
+                                   (s-replace-regexp "[']" "\"" contents)
+                                   "'"))))
 
 (defun bear:push-note ()
   "Select a note from bear notes directory."
